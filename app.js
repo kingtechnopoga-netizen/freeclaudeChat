@@ -2,7 +2,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const form=$("#chat-form"),input=$("#input"),send=$("#send"),messagesEl=$("#messages"),modelMenu=$("#modelMenu"),modelBtn=$("#modelBtn"),modelName=$("#modelName"),sidebar=$("#sidebar"),overlay=$("#overlay"),toastEl=$("#toast");
 let selectedModel=localStorage.getItem("selectedModel")||"grok-4.5";
 let messages=[], attached=[], chats=JSON.parse(localStorage.getItem("claudeChats")||"[]"), currentId=crypto.randomUUID(), aborter=null;
-const labels={"grok-4.7":"Grok 4.7","grok-4.6":"Grok 4.6","grok-4.5":"Grok 4.5","grok-4.5-latest":"Grok 4.5 Latest","grok-latest":"Grok Latest","grok":"Grok","composer-2.5":"Composer 2.5","grok-composer":"Grok Composer","grok-composer-2.5-fast":"Grok Composer 2.5 Fast","grok-build-latest":"Grok Build Latest"};
+const labels={};
 modelName.textContent=labels[selectedModel]||selectedModel;
 function toast(t){toastEl.textContent=t;toastEl.classList.add("show");setTimeout(()=>toastEl.classList.remove("show"),1800)}
 function save(){localStorage.setItem("claudeChats",JSON.stringify(chats.slice(-30)))}
@@ -23,7 +23,31 @@ input.oninput=resize;input.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.prev
 $("#attachBtn").onclick=()=>$("#fileInput").click();$("#fileInput").onchange=e=>{[...e.target.files].forEach(f=>{attached.push(f);const a=document.createElement("div");a.className="attachment";a.innerHTML=esc(f.name)+' <button>×</button>';a.querySelector("button").onclick=()=>{attached=attached.filter(x=>x!==f);a.remove()};$("#attachmentTray").appendChild(a)});e.target.value=""};
 $("#newChat").onclick=newChat;$("#brandBtn").onclick=newChat;$("#searchChats").oninput=e=>renderHistory(e.target.value);
 modelBtn.onclick=e=>{e.stopPropagation();modelMenu.classList.toggle("open")};document.onclick=e=>{if(!modelMenu.contains(e.target)&&e.target!==modelBtn)modelMenu.classList.remove("open")};
-$$("[data-model]").forEach(b=>b.onclick=()=>{selectedModel=b.dataset.model;localStorage.setItem("selectedModel",selectedModel);modelName.textContent=labels[selectedModel]||selectedModel;modelMenu.classList.remove("open");toast("Model changed")});
+function addModelButton(id){
+  const list=$("#modelList"); if(!list)return;
+  const b=document.createElement("button"); b.dataset.model=id;
+  const name=document.createElement("b"); name.textContent=id;
+  const small=document.createElement("small"); small.textContent="Upstream model";
+  b.append(name,small);
+  b.onclick=()=>{selectedModel=id;localStorage.setItem("selectedModel",selectedModel);modelName.textContent=labels[selectedModel]||selectedModel;modelMenu.classList.remove("open");toast("Model changed")};
+  list.appendChild(b);
+}
+async function loadModels(){
+  const list=$("#modelList"); if(!list)return;
+  try{
+    const r=await fetch("/api/v1/models");
+    const d=await r.json();
+    const ids=(d.data||[]).map(x=>x.id).filter(Boolean);
+    list.innerHTML="";
+    if(!ids.length)throw Error("No models returned");
+    ids.forEach(id=>{labels[id]=id;addModelButton(id)});
+    if(!ids.includes(selectedModel))selectedModel=ids[0];
+    modelName.textContent=labels[selectedModel]||selectedModel;
+  }catch(e){
+    list.innerHTML='<div class="model-heading">Unable to load models</div>';
+    ["grok-4.7","grok-4.6","grok-4.5","grok-4.5-latest","grok-latest","grok","composer-2.5","grok-composer","grok-composer-2.5-fast","grok-build-latest"].forEach(id=>{labels[id]=id;addModelButton(id)});
+  }
+}
 $("#webBtn").onclick=e=>{e.currentTarget.classList.toggle("on");toast(e.currentTarget.classList.contains("on")?"Web search enabled":"Web search disabled")};
 $("#thinkBtn").onclick=e=>{e.currentTarget.classList.toggle("on");toast(e.currentTarget.classList.contains("on")?"Extended thinking enabled":"Extended thinking disabled")};
 $("#shareBtn").onclick=()=>{navigator.clipboard?.writeText(location.href);toast("Chat link copied")};
@@ -32,4 +56,4 @@ $("#themeBtn").onclick=()=>{document.body.classList.toggle("dark");const d=docum
 if(localStorage.getItem("dark")==="true"){$("body").classList.add("dark");$("#themeLabel").textContent="Dark"}
 $("#openSide").onclick=()=>{sidebar.classList.add("open");overlay.classList.add("show")};$("#closeSide").onclick=closeSide;overlay.onclick=closeSide;function closeSide(){sidebar.classList.remove("open");overlay.classList.remove("show")}
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();newChat()}});
-renderHistory();bindSuggestions();
+renderHistory();bindSuggestions();loadModels();
