@@ -1,2 +1,90 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AI Chat</title><link rel="stylesheet" href="/style.css"></head><body><main class="app"><header class="topbar"><div><div class="brand">AI Chat</div><div class="status"><span></span> Ready</div></div><label class="model-wrap"><span>Model</span><select id="model"><option>grok-4.5</option><option>grok-4.5-latest</option><option>grok-4.6</option><option>grok-4.7</option><option>grok-latest</option><option>grok</option><option>composer-2.5</option><option>grok-build-latest</option><option>grok-composer</option><option>grok-composer-2.5-fast</option></select></label></header><section id="messages" class="messages"><div class="welcome"><div class="welcome-icon">✦</div><h1>How can I help?</h1><p>Select a model and start a conversation.</p></div></section><form id="chat-form" class="composer"><textarea id="input" rows="1" placeholder="Message the AI..." autocomplete="off"></textarea><button id="send" type="submit" aria-label="Send">↑</button></form><div class="footer">AI responses may be inaccurate. Verify important information.</div></main><script src="/app.js"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f6f2">
+<title>Claude-style AI Chat</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-top">
+      <button class="brand" id="brandBtn" aria-label="Home"><span class="brand-mark">✦</span><span>Claude</span></button>
+      <button class="icon-btn mobile-only" id="closeSide" aria-label="Close sidebar">×</button>
+    </div>
+    <button class="new-chat" id="newChat"><span>＋</span> New chat <kbd>⌘ K</kbd></button>
+    <div class="side-search"><span>⌕</span><input id="searchChats" placeholder="Search chats"></div>
+    <div class="nav-list">
+      <button class="nav-item active"><span>◒</span> Chats</button>
+      <button class="nav-item"><span>▣</span> Projects <small>+</small></button>
+    </div>
+    <div class="history-title">Recent</div>
+    <div id="chatHistory" class="history"></div>
+    <div class="side-spacer"></div>
+    <div class="side-bottom">
+      <button class="account" id="accountBtn"><span class="avatar-small">V</span><span><b>Victor</b><small>Free plan</small></span><i>⋯</i></button>
+      <button class="side-link" id="themeBtn"><span>☼</span> Appearance <span id="themeLabel">Light</span></button>
+      <a class="side-link" href="https://github.com/kingtechnopoga-netizen/freeclaudeChat" target="_blank" rel="noreferrer"><span>⌁</span> GitHub</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <button class="icon-btn mobile-only" id="openSide" aria-label="Open sidebar">☰</button>
+      <div class="model-picker">
+        <button id="modelBtn" class="model-btn"><span id="modelName">Claude Sonnet</span><span class="chev">⌄</span></button>
+        <div class="model-menu" id="modelMenu">
+          <div class="model-heading">Choose a model</div>
+          <button data-model="grok-4.5"><b>Claude Sonnet</b><small>Balanced speed and intelligence</small></button>
+          <button data-model="grok-4.7"><b>Claude Opus</b><small>Maximum capability</small></button>
+          <button data-model="grok-4.5-latest"><b>Claude Haiku</b><small>Fast for everyday tasks</small></button>
+          <div class="model-heading">Other models</div>
+          <button data-model="grok"><b>Grok</b><small>Upstream model</small></button>
+          <button data-model="composer-2.5"><b>Composer 2.5</b><small>Upstream model</small></button>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="shareBtn" title="Share">⇧</button>
+        <button class="icon-btn" id="moreBtn" title="More">⋯</button>
+      </div>
+    </header>
+
+    <section class="chat" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="claude-orb">✦</div>
+        <h1>How can I help you today?</h1>
+        <p>Ask anything, brainstorm ideas, analyze files, or write code.</p>
+        <div class="suggestions">
+          <button data-prompt="Help me plan a project from scratch">Plan a project <span>→</span></button>
+          <button data-prompt="Explain a complex topic in simple terms">Explain something <span>→</span></button>
+          <button data-prompt="Write a polished professional message">Write for me <span>→</span></button>
+          <button data-prompt="Help me debug my code">Debug code <span>→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <div class="composer-wrap">
+      <div id="attachmentTray" class="attachment-tray"></div>
+      <form class="composer" id="chat-form">
+        <input id="fileInput" type="file" hidden multiple>
+        <button type="button" class="tool-btn" id="attachBtn" title="Attach files">＋</button>
+        <textarea id="input" rows="1" placeholder="Message Claude..." autocomplete="off"></textarea>
+        <div class="composer-bottom">
+          <div class="composer-tools">
+            <button type="button" class="tool-pill" id="webBtn">◎ <span>Web search</span></button>
+            <button type="button" class="tool-pill" id="thinkBtn">✧ <span>Extended thinking</span></button>
+          </div>
+          <button id="send" class="send-btn" type="submit" aria-label="Send">↑</button>
+        </div>
+      </form>
+      <div class="disclaimer">Claude can make mistakes. Please verify important information.</div>
+    </div>
+  </main>
+</div>
+<div class="overlay" id="overlay"></div>
+<div class="toast" id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
