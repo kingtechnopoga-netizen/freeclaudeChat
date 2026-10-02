@@ -58,7 +58,8 @@ export default async function handler(request){
     if(body.stream)
       return json({error:{type:"invalid_request_error",message:"Streaming is not implemented yet."}},400);
 
-    const base=(process.env.UPSTREAM_BASE_URL||"https://api.yuvraj.pro/v1").replace(/\\/+$/,"");
+    let base=process.env.UPSTREAM_BASE_URL||"https://api.yuvraj.pro/v1";
+    while(base.endsWith("/"))base=base.slice(0,-1);
     const headers=upstreamHeadersForOpenAI();
 
     const chatBody={model:body.model,messages:body.messages,stream:false};
@@ -106,7 +107,6 @@ export default async function handler(request){
     const rb={
       model:body.model,
       input:input(body.messages),
-      max_output_tokens:body.max_tokens,
       max_output_tokens:body.max_tokens,
       top_p:body.top_p,
       tools:body.tools,
