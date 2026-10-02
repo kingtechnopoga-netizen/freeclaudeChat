@@ -45,7 +45,7 @@ export default async function handler(request){
     if(request.method!=="POST")
       return json({error:{message:"Method not allowed"}},405);
 
-    const base=(process.env.UPSTREAM_BASE_URL||"https://api.yuvraj.pro/v1").replace(/\/+$/,"");
+    if(!process.env.YUVRAJ_API_KEY)
       return json({error:{message:"YUVRAJ_API_KEY is not configured"}},500);
 
     const body=await readJson(request);
@@ -106,7 +106,7 @@ export default async function handler(request){
     const rb={
       model:body.model,
       input:input(body.messages),
-      const upstream=data?.error?.message||data?.message||raw?.replace(/\s+/g," ").slice(0,800);
+      max_output_tokens:body.max_tokens,
       max_output_tokens:body.max_tokens,
       top_p:body.top_p,
       tools:body.tools,
@@ -136,7 +136,7 @@ export default async function handler(request){
     }
 
     if(!res.ok||!data){
-      const upstream=data?.error?.message||data?.message||raw?.replace(/\\s+/g," ").slice(0,800);
+      const upstream=data?.error?.message||data?.message||raw?.replace(/\s+/g," ").slice(0,800);
       return errResponse(502,
         upstream||"Upstream API returned an invalid or empty response.",
         {upstream_status:res.status}
